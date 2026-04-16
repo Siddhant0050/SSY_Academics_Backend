@@ -6,8 +6,9 @@ import org.springframework.web.bind.annotation.*;
 import com.example.demo.dto.*;
 import com.example.demo.interfaces.AuthService;
 
+@CrossOrigin(origins = "http://localhost:5173")
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 public class AuthController {
 
 	private final AuthService authService;
