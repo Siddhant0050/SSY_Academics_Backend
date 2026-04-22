@@ -1,13 +1,21 @@
 package com.example.demo.interfaces;
 
-import com.example.demo.dto.EnrollmentDTO;
+import com.example.demo.dto.EnrollmentRequestDTO;
+import com.example.demo.dto.EnrollmentResponseDTO;
+
 import java.util.List;
 
 public interface EnrollmentService {
 
-	EnrollmentDTO enrollUser(EnrollmentDTO dto);
+    // 🔥 Create enrollment
+    EnrollmentResponseDTO enrollUser(EnrollmentRequestDTO dto);
 
-	List<EnrollmentDTO> getAllEnrollments();
+    // 🔥 Get all enrollments
+    List<EnrollmentResponseDTO> getAllEnrollments();
 
-	void deleteEnrollment(Long id);
+    // 🔥 Get enrollments by batch (VERY USEFUL for UI)
+    List<EnrollmentResponseDTO> getByBatch(Long batchId);
+
+    // 🔥 Delete
+    void deleteEnrollment(Long id);
 }

@@ -15,86 +15,119 @@ import com.example.demo.repository.CourseRepository;
 @Service
 public class CourseServiceImpl implements CourseService {
 
-    private final CourseRepository courseRepo;
+	private final CourseRepository courseRepo;
 
-    public CourseServiceImpl(CourseRepository courseRepo) {
-        this.courseRepo = courseRepo;
-    }
+	public CourseServiceImpl(CourseRepository courseRepo) {
+		this.courseRepo = courseRepo;
+	}
 
-    // ✅ CREATE
-    @Override
-    public CourseDTO createCourse(CourseDTO dto) {
+	// =========================
+	// ✅ CREATE COURSE
+	// =========================
+	@Override
+	public CourseDTO createCourse(CourseDTO dto) {
 
-        if (dto.getTitle() == null || dto.getTitle().isEmpty()) {
-            throw new AppException("Course title is required", HttpStatus.BAD_REQUEST);
-        }
+		if (dto.getTitle() == null || dto.getTitle().isEmpty()) {
+			throw new AppException("Course title is required", HttpStatus.BAD_REQUEST);
+		}
 
-        Course course = new Course();
-        course.setTitle(dto.getTitle());
-        course.setDescription(dto.getDescription());
+		Course course = mapToEntity(dto);
+		Course savedCourse = courseRepo.save(course);
 
-        return mapToDTO(courseRepo.save(course));
-    }
+		return mapToDTO(savedCourse);
+	}
 
-    // ✅ GET ALL
-    @Override
-    public List<CourseDTO> getAllCourses() {
-        return courseRepo.findAll()
-                .stream()
-                .map(this::mapToDTO)
-                .collect(Collectors.toList());
-    }
+	// =========================
+	// ✅ GET ALL COURSES
+	// =========================
+	@Override
+	public List<CourseDTO> getAllCourses() {
+		return courseRepo.findAll().stream().map(this::mapToDTO).collect(Collectors.toList());
+	}
 
-    // ✅ GET BY ID
-    @Override
-    public CourseDTO getCourseById(Long id) {
-        Course course = courseRepo.findById(id)
-                .orElseThrow(() -> new AppException(
-                        "Course not found with ID: " + id,
-                        HttpStatus.NOT_FOUND
-                ));
+	// =========================
+	// ✅ GET COURSE BY ID
+	// =========================
+	@Override
+	public CourseDTO getCourseById(Long id) {
+		Course course = courseRepo.findById(id)
+				.orElseThrow(() -> new AppException("Course not found with ID: " + id, HttpStatus.NOT_FOUND));
 
-        return mapToDTO(course);
-    }
+		return mapToDTO(course);
+	}
 
-    // ✅ UPDATE
-    @Override
-    public CourseDTO updateCourse(Long id, CourseDTO dto) {
+	// =========================
+	// ✅ UPDATE COURSE
+	// =========================
+	@Override
+	public CourseDTO updateCourse(Long id, CourseDTO dto) {
 
-        Course course = courseRepo.findById(id)
-                .orElseThrow(() -> new AppException(
-                        "Course not found with ID: " + id,
-                        HttpStatus.NOT_FOUND
-                ));
+		Course course = courseRepo.findById(id)
+				.orElseThrow(() -> new AppException("Course not found with ID: " + id, HttpStatus.NOT_FOUND));
 
-        if (dto.getTitle() != null && !dto.getTitle().isEmpty()) {
-            course.setTitle(dto.getTitle());
-        }
+		// Update only if provided
+		if (dto.getTitle() != null && !dto.getTitle().isEmpty()) {
+			course.setTitle(dto.getTitle());
+		}
 
-        course.setDescription(dto.getDescription());
+		if (dto.getDescription() != null) {
+			course.setDescription(dto.getDescription());
+		}
 
-        return mapToDTO(courseRepo.save(course));
-    }
+		if (dto.getPrice() != null) {
+			course.setPrice(dto.getPrice());
+		}
 
-    // ✅ DELETE
-    @Override
-    public void deleteCourse(Long id) {
+		if (dto.getImageUrl() != null) {
+			course.setImageUrl(dto.getImageUrl());
+		}
 
-        Course course = courseRepo.findById(id)
-                .orElseThrow(() -> new AppException(
-                        "Course not found with ID: " + id,
-                        HttpStatus.NOT_FOUND
-                ));
+		Course updatedCourse = courseRepo.save(course);
 
-        courseRepo.delete(course);
-    }
+		return mapToDTO(updatedCourse);
+	}
 
-    // 🔁 MAPPER
-    private CourseDTO mapToDTO(Course course) {
-        return new CourseDTO(
-                course.getId(),
-                course.getTitle(),
-                course.getDescription()
-        );
-    }
+	// =========================
+	// ✅ DELETE COURSE
+	// =========================
+	@Override
+	public void deleteCourse(Long id) {
+
+		Course course = courseRepo.findById(id)
+				.orElseThrow(() -> new AppException("Course not found with ID: " + id, HttpStatus.NOT_FOUND));
+
+		courseRepo.delete(course);
+	}
+
+	// =========================
+	// 🔁 ENTITY → DTO
+	// =========================
+	private CourseDTO mapToDTO(Course course) {
+		CourseDTO dto = new CourseDTO();
+
+		dto.setId(course.getId());
+		dto.setTitle(course.getTitle());
+		dto.setDescription(course.getDescription());
+
+		dto.setPrice(course.getPrice()); // ✅ FIXED
+		dto.setImageUrl(course.getImageUrl()); // ✅ FIXED
+
+		return dto;
+	}
+
+	// =========================
+	// 🔁 DTO → ENTITY
+	// =========================
+	private Course mapToEntity(CourseDTO dto) {
+		Course course = new Course();
+
+		course.setId(dto.getId());
+		course.setTitle(dto.getTitle());
+		course.setDescription(dto.getDescription());
+
+		course.setPrice(dto.getPrice()); // ✅ FIXED
+		course.setImageUrl(dto.getImageUrl()); // ✅ FIXED
+
+		return course;
+	}
 }

@@ -17,11 +17,12 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(SECRET.getBytes());
     }
 
-    // ✅ Generate token with role
-    public String generateToken(String email, String role) {
+    // ✅ Generate token with role + name
+    public String generateToken(String email, String role, String name) {
         return Jwts.builder()
                 .setSubject(email)
-                .claim("role", role) // keep as ADMIN / STUDENT
+                .claim("role", role)
+                .claim("name", name)
                 .signWith(getSignKey())
                 .compact();
     }
@@ -32,6 +33,10 @@ public class JwtUtil {
 
     public String extractRole(String token) {
         return getClaims(token).get("role", String.class);
+    }
+
+    public String extractName(String token) {   // ✅ NEW
+        return getClaims(token).get("name", String.class);
     }
 
     public boolean validateToken(String token) {

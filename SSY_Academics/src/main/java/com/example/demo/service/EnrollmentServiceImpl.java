@@ -1,7 +1,7 @@
 package com.example.demo.service;
 
-import com.example.demo.Exception.AppException;
-import com.example.demo.dto.EnrollmentDTO;
+import com.example.demo.dto.EnrollmentRequestDTO;
+import com.example.demo.dto.EnrollmentResponseDTO;
 import com.example.demo.interfaces.EnrollmentService;
 import com.example.demo.model.Batch;
 import com.example.demo.model.Enrollment;
@@ -10,7 +10,7 @@ import com.example.demo.repository.BatchRepository;
 import com.example.demo.repository.EnrollmentRepository;
 import com.example.demo.repository.UserRepository;
 
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,73 +19,80 @@ import java.util.stream.Collectors;
 @Service
 public class EnrollmentServiceImpl implements EnrollmentService {
 
-    private final EnrollmentRepository enrollmentRepository;
-    private final UserRepository userRepository;
-    private final BatchRepository batchRepository;
+    @Autowired
+    private EnrollmentRepository enrollmentRepository;
 
-    public EnrollmentServiceImpl(EnrollmentRepository enrollmentRepository,
-                                 UserRepository userRepository,
-                                 BatchRepository batchRepository) {
-        this.enrollmentRepository = enrollmentRepository;
-        this.userRepository = userRepository;
-        this.batchRepository = batchRepository;
-    }
+    @Autowired
+    private UserRepository userRepository;
 
-    // DTO → Entity
-    private Enrollment mapToEntity(User user, Batch batch) {
-        return new Enrollment(user, batch);
-    }
+    @Autowired
+    private BatchRepository batchRepository;
 
-    // Entity → DTO
-    private EnrollmentDTO mapToDTO(Enrollment enrollment) {
-        return new EnrollmentDTO(
-                enrollment.getId(),
-                enrollment.getUser().getId(),
-                enrollment.getBatch().getId()
-        );
-    }
-
-    // ✅ CREATE ENROLLMENT (ADMIN already validated in controller)
+    // ✅ ENROLL USER
     @Override
-    public EnrollmentDTO enrollUser(EnrollmentDTO dto) {
-
-        if (dto.getUserId() == null || dto.getBatchId() == null) {
-            throw new AppException("userId and batchId must not be null", HttpStatus.BAD_REQUEST);
-        }
+    public EnrollmentResponseDTO enrollUser(EnrollmentRequestDTO dto) {
 
         User user = userRepository.findById(dto.getUserId())
-                .orElseThrow(() -> new AppException(
-                        "User not found with ID: " + dto.getUserId(),
-                        HttpStatus.NOT_FOUND
-                ));
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         Batch batch = batchRepository.findById(dto.getBatchId())
-                .orElseThrow(() -> new AppException(
-                        "Batch not found with ID: " + dto.getBatchId(),
-                        HttpStatus.NOT_FOUND
-                ));
+                .orElseThrow(() -> new RuntimeException("Batch not found"));
 
-        Enrollment enrollment = mapToEntity(user, batch);
+        // ❌ Duplicate check
+        if (enrollmentRepository.existsByUserAndBatch(user, batch)) {
+            throw new RuntimeException("Student already enrolled");
+        }
 
-        return mapToDTO(enrollmentRepository.save(enrollment));
+        // 🔥 Capacity check
+        long count = enrollmentRepository.countByBatch(batch);
+
+        if (batch.getCapacity() == null || batch.getCapacity() <= 0) {
+            throw new RuntimeException("Batch capacity not set properly");
+        }
+
+        if (count >= batch.getCapacity()) {
+            throw new RuntimeException("Batch is full");
+        }
+
+        // ✅ Save
+        Enrollment enrollment = new Enrollment(user, batch);
+        Enrollment saved = enrollmentRepository.save(enrollment);
+
+        return mapToDTO(saved);
     }
 
+    // ✅ GET ALL
     @Override
-    public List<EnrollmentDTO> getAllEnrollments() {
+    public List<EnrollmentResponseDTO> getAllEnrollments() {
         return enrollmentRepository.findAll()
                 .stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
 
+    // ✅ GET BY BATCH
+    @Override
+    public List<EnrollmentResponseDTO> getByBatch(Long batchId) {
+        return enrollmentRepository.findByBatchId(batchId)
+                .stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    // ✅ DELETE
     @Override
     public void deleteEnrollment(Long id) {
-        Enrollment enrollment = enrollmentRepository.findById(id)
-                .orElseThrow(() -> new AppException(
-                        "Enrollment not found with ID: " + id,
-                        HttpStatus.NOT_FOUND
-                ));
+        enrollmentRepository.deleteById(id);
+    }
 
-        enrollmentRepository.delete(enrollment);
+    // ✅ MAPPER
+    private EnrollmentResponseDTO mapToDTO(Enrollment e) {
+        return new EnrollmentResponseDTO(
+                e.getId(),
+                e.getUser().getId(),
+                e.getUser().getName(),
+                e.getBatch().getId(),
+                e.getBatch().getBatchName()
+        );
     }
 }

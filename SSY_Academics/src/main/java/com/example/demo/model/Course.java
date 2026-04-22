@@ -6,44 +6,69 @@ import jakarta.persistence.*;
 @Table(name = "courses")
 public class Course {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    private String title;
-    private String description;
+	private String title;
+	private String description;
 
-    // 🔹 Constructors
-    public Course() {}
+	@Column(name = "price") // ✅ ensure mapping
+	private Double price;
 
-    public Course(Long id, String title, String description) {
-        this.id = id;
-        this.title = title;
-        this.description = description;
-    }
+	@Column(name = "image_url") // ✅ IMPORTANT (DB uses snake_case)
+	private String imageUrl;
 
-    // 🔹 Getters & Setters
-    public Long getId() {
-        return id;
-    }
+	public Course() {
+	}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	public Course(Long id, String title, String description, Double price, String imageUrl) {
+		this.id = id;
+		this.title = title;
+		this.description = description;
+		this.price = price;
+		this.imageUrl = imageUrl;
+	}
 
-    public String getTitle() {
-        return title;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public String getDescription() {
-        return description;
-    }
+	public String getTitle() {
+		return title;
+	}
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public Double getPrice() {
+		return price;
+	}
+
+	public void setPrice(Double price) {
+		this.price = price;
+	}
+
+	public String getImageUrl() {
+		return imageUrl;
+	}
+
+	public void setImageUrl(String imageUrl) {
+		this.imageUrl = imageUrl;
+	}
+
+	// getters & setters
 }

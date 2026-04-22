@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.EnrollmentDTO;
+import com.example.demo.dto.EnrollmentRequestDTO;
+import com.example.demo.dto.EnrollmentResponseDTO;
 import com.example.demo.interfaces.EnrollmentService;
 
 import org.springframework.http.ResponseEntity;
@@ -23,15 +24,22 @@ public class EnrollmentController {
     // 🔥 ADMIN ONLY → Assign user to batch
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<EnrollmentDTO> enrollUser(@RequestBody EnrollmentDTO dto) {
+    public ResponseEntity<EnrollmentResponseDTO> enrollUser(@RequestBody EnrollmentRequestDTO dto) {
         return ResponseEntity.ok(enrollmentService.enrollUser(dto));
     }
 
-    // 🔓 ADMIN & STUDENT → View enrollments
+    // 🔓 ADMIN & STUDENT → View all enrollments
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN','STUDENT')")
-    public ResponseEntity<List<EnrollmentDTO>> getAllEnrollments() {
+    public ResponseEntity<List<EnrollmentResponseDTO>> getAllEnrollments() {
         return ResponseEntity.ok(enrollmentService.getAllEnrollments());
+    }
+
+    // 🔓 GET BY BATCH (IMPORTANT)
+    @GetMapping("/batch/{batchId}")
+    @PreAuthorize("hasAnyRole('ADMIN','STUDENT')")
+    public ResponseEntity<List<EnrollmentResponseDTO>> getByBatch(@PathVariable Long batchId) {
+        return ResponseEntity.ok(enrollmentService.getByBatch(batchId));
     }
 
     // 🔥 ADMIN ONLY → Delete enrollment

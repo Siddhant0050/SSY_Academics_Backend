@@ -4,44 +4,69 @@ import jakarta.validation.constraints.NotBlank;
 
 public class CourseDTO {
 
-    private Long id;
+	private Long id;
 
-    @NotBlank(message = "Title is required")
-    private String title;
+	@NotBlank(message = "Title is required")
+	private String title;
 
-    private String description;
+	private String description;
 
-    // Constructors
-    public CourseDTO() {}
+	private Double price; // ✅ ADD THIS
+	private String imageUrl; // ✅ ADD THIS
 
-    public CourseDTO(Long id, String title, String description) {
-        this.id = id;
-        this.title = title;
-        this.description = description;
-    }
+	// Constructors
+	public CourseDTO() {
+	}
 
-    // Getters & Setters
-    public Long getId() {
-        return id;
-    }
+	public CourseDTO(Long id, String title, String description, Double price, String imageUrl) {
+		this.id = id;
+		this.title = title;
+		this.description = description;
+		this.price = price;
+		this.imageUrl = imageUrl;
+	}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	// Getters & Setters
 
-    public String getTitle() {
-        return title;
-    }
+	public Double getPrice() {
+		return price;
+	}
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+	public void setPrice(Double price) {
+		this.price = price;
+	}
 
-    public String getDescription() {
-        return description;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getImageUrl() {
+		return imageUrl;
+	}
+
+	public void setImageUrl(String imageUrl) {
+		this.imageUrl = imageUrl;
+	}
+
+	// existing getters/setters...
 }

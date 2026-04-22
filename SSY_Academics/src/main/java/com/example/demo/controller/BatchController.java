@@ -2,50 +2,44 @@ package com.example.demo.controller;
 
 import com.example.demo.dto.BatchDTO;
 import com.example.demo.interfaces.BatchService;
-import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
-@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/batches")
+@CrossOrigin(origins = "*")
 public class BatchController {
 
-	private final BatchService batchService;
+    private final BatchService batchService;
 
-	public BatchController(BatchService batchService) {
-		this.batchService = batchService;
-	}
+    public BatchController(BatchService batchService) {
+        this.batchService = batchService;
+    }
 
-	// ✅ CREATE
-	@PostMapping
-	public ResponseEntity<BatchDTO> createBatch(@RequestBody BatchDTO batchDTO) {
-		return ResponseEntity.ok(batchService.createBatch(batchDTO));
-	}
+    @PostMapping
+    public BatchDTO createBatch(@RequestBody BatchDTO dto) {
+        return batchService.createBatch(dto);
+    }
 
-	// ✅ GET BY ID
-	@GetMapping("/{id}")
-	public ResponseEntity<BatchDTO> getBatchById(@PathVariable Long id) {
-		return ResponseEntity.ok(batchService.getBatchById(id));
-	}
+    @GetMapping
+    public List<BatchDTO> getAll() {
+        return batchService.getAllBatches();
+    }
 
-	// ✅ GET ALL
-	@GetMapping
-	public ResponseEntity<List<BatchDTO>> getAllBatches() {
-		return ResponseEntity.ok(batchService.getAllBatches());
-	}
+    @GetMapping("/{id}")
+    public BatchDTO getById(@PathVariable Long id) {
+        return batchService.getBatchById(id);
+    }
 
-	// ✅ UPDATE
-	@PutMapping("/{id}")
-	public ResponseEntity<BatchDTO> updateBatch(@PathVariable Long id, @RequestBody BatchDTO batchDTO) {
+    @PutMapping("/{id}")
+    public BatchDTO update(@PathVariable Long id, @RequestBody BatchDTO dto) {
+        return batchService.updateBatch(id, dto);
+    }
 
-		return ResponseEntity.ok(batchService.updateBatch(id, batchDTO));
-	}
-
-	// ✅ DELETE
-	@DeleteMapping("/{id}")
-	public ResponseEntity<String> deleteBatch(@PathVariable Long id) {
-		batchService.deleteBatch(id);
-		return ResponseEntity.ok("Batch deleted successfully");
-	}
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id) {
+        batchService.deleteBatch(id);
+    }
 }
